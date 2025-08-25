@@ -22,9 +22,9 @@ class User extends Database {
         $stmt->execute();
         $total = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
 
-        if ($total >= 5000000) {
+        if ($total >= 500000) {
             $level = 'gold';
-        } elseif ($total >= 1000000) {
+        } elseif ($total >= 200000) {
             $level = 'reguler';
         } else {
             $level = 'non';

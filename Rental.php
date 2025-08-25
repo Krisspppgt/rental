@@ -1,17 +1,14 @@
 <?php
-class Rental {
-    private $db;
+require_once "Database.php";
 
-    public function __construct($db) {
-        $this->db = $db;
-    }
+class Rental extends Database {
 
     public function getPSList() {
-        return $this->db->conn->query("SELECT * FROM ps_list");
+        return $this->conn->query("SELECT * FROM ps_list");
     }
 
     public function addRental($user_id, $id_ps, $lama_sewa, $level) {
-        $stmt = $this->db->conn->prepare("SELECT nama_ps, harga_per_jam FROM ps_list WHERE id=?");
+        $stmt = $this->conn->prepare("SELECT nama_ps, harga_per_jam FROM ps_list WHERE id=?");
         $stmt->bind_param("i", $id_ps);
         $stmt->execute();
         $ps = $stmt->get_result()->fetch_assoc();
@@ -20,14 +17,14 @@ class Rental {
 
         $cashback = 0;
         if ($level == 'reguler') {
-            $cashback = 0.02 * $total_asli;
-        } elseif ($level == 'gold') {
             $cashback = 0.05 * $total_asli;
+        } elseif ($level == 'gold') {
+            $cashback = 0.10 * $total_asli;
         }
 
         $total_bayar = $total_asli - $cashback;
 
-        $insert = $this->db->conn->prepare("
+        $insert = $this->conn->prepare("
             INSERT INTO transaksi (user_id, id_ps, lama_sewa, total_bayar, cashback, status)
             VALUES (?, ?, ?, ?, ?, 'Selesai')
         ");
@@ -44,7 +41,7 @@ class Rental {
     }
 
     public function getTransaksiByUser($user_id) {
-        $stmt = $this->db->conn->prepare("
+        $stmt = $this->conn->prepare("
             SELECT t.id, p.nama_ps, t.lama_sewa,
                    (t.total_bayar + t.cashback) AS total_asli,
                    t.cashback, t.total_bayar, t.status
